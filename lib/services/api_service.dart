@@ -41,4 +41,39 @@ class ApiService {
 
     return jsonDecode(response.body);
   }
+
+  // جلب كل المحاصيل
+  static Future<List<dynamic>> getCrops() async {
+    final response = await http.get(
+      Uri.parse('http://192.168.43.220:5000/api/crops'),
+    );
+
+    return jsonDecode(response.body);
+  }
+  // إضافة محصول جديد
+  static Future<Map<String, dynamic>> addCrop({
+    required String farmerId,
+    required String title,
+    required String category,
+    required double price,
+    required double quantity,
+    required String unit,
+    required String location,
+  }) async {
+    final response = await http.post(
+      Uri.parse('http://192.168.43.220:5000/api/crops'),
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode({
+        'farmer': farmerId,
+        'title': title,
+        'category': category,
+        'price': price,
+        'quantity': quantity,
+        'unit': unit,
+        'location': location,
+      }),
+    );
+
+    return jsonDecode(response.body);
+  }
 }

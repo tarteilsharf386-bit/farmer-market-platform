@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
+import 'crops_list_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,16 +28,20 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text,
       );
 
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
 
       if (result['token'] != null) {
-        // نجح تسجيل الدخول
-        setState(() {
-          message = 'مرحباً ${result['user']['name']} 👋';
-        });
-        // هنا لاحقاً بنضيف: حفظ الـ token والانتقال للشاشة الرئيسية
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CropsListScreen(
+                farmerId: result['user']['id'],
+                userName: result['user']['name'],
+              ),
+            ),
+          );
+        }
       } else {
         setState(() {
           message = result['message'] ?? 'حدث خطأ';
@@ -43,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       setState(() {
-        message = 'فشل الاتصال بالسيرفر: $e';
+        message = 'فشل الاتصال بالسيرفر';
         isLoading = false;
       });
     }
@@ -52,37 +58,70 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('تسجيل الدخول')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(labelText: 'رقم الهاتف'),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'كلمة المرور'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: handleLogin,
-                    child: const Text('دخول'),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 60),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-            const SizedBox(height: 20),
-            Text(
-              message,
-              style: const TextStyle(color: Colors.green, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          ],
+                  child: const Icon(Icons.storefront, size: 60, color: AppColors.primary),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'تسجيل الدخول',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textDark),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'مرحباً بعودتك 👋',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: AppColors.textGrey),
+              ),
+              const SizedBox(height: 32),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'رقم الهاتف',
+                  prefixIcon: Icon(Icons.phone_outlined),
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'كلمة المرور',
+                  prefixIcon: Icon(Icons.lock_outline),
+                ),
+              ),
+              const SizedBox(height: 26),
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: handleLogin,
+                      child: const Text('دخول'),
+                    ),
+              if (message.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

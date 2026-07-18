@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme/app_theme.dart';
 import 'screens/register_screen.dart';
 
 void main() {
@@ -13,7 +14,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'منصة المزارعين',
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: AppTheme.lightTheme,
+      locale: const Locale('ar'),
       home: const RegisterScreen(),
     );
   }
