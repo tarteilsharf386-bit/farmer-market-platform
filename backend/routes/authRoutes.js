@@ -9,16 +9,13 @@ router.post('/register', async (req, res) => {
   try {
     const { name, phone, password, role, location } = req.body;
 
-    // تأكدي إن رقم الهاتف مو مستخدم من قبل
     const existingUser = await User.findOne({ phone });
     if (existingUser) {
       return res.status(400).json({ message: 'رقم الهاتف مستخدم بالفعل' });
     }
 
-    // تشفير كلمة المرور
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // إنشاء المستخدم الجديد
     const newUser = new User({
       name,
       phone,
@@ -65,6 +62,7 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'حدث خطأ', error: error.message });
   }
 });
+
 // جلب بيانات مستخدم واحد
 router.get('/user/:id', async (req, res) => {
   try {
@@ -89,4 +87,48 @@ router.put('/user/:id', async (req, res) => {
     res.status(500).json({ message: 'حدث خطأ', error: error.message });
   }
 });
+
+// توليد رمز تحقق مؤقت (محاكاة SMS)
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    const user = await User.findOne({ phone });
+    if (!user) {
+      return res.status(400).json({ message: 'رقم الهاتف غير مسجل' });
+    }
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 5 * 60 * 1000;
+    await user.save();
+
+    res.status(200).json({ message: 'تم إرسال رمز التحقق', otp: otp });
+  } catch (error) {
+    res.status(500).json({ message: 'حدث خطأ', error: error.message });
+  }
+});
+
+// التحقق من الرمز وتغيير كلمة المرور
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { phone, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ phone });
+    if (!user || user.otp !== otp || Date.now() > user.otpExpires) {
+      return res.status(400).json({ message: 'رمز التحقق غير صحيح أو منتهي الصلاحية' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'تم تغيير كلمة المرور بنجاح' });
+  } catch (error) {
+    res.status(500).json({ message: 'حدث خطأ', error: error.message });
+  }
+});
+
 module.exports = router;

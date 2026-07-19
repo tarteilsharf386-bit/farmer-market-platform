@@ -8,6 +8,7 @@ import '../services/session_manager.dart';
 import 'register_screen.dart';
 import 'profile_screen.dart';
 import 'my_crops_screen.dart';
+import 'app_drawer.dart';
 
 class CropsListScreen extends StatefulWidget {
   final String farmerId;
@@ -75,6 +76,11 @@ class _CropsListScreenState extends State<CropsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: AppDrawer(
+        userId: widget.farmerId,
+        userName: widget.userName,
+        userRole: widget.userRole,
+      ),
       appBar: AppBar(
         title: Text('مرحباً، ${widget.userName}'),
         actions: [

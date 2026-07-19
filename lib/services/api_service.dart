@@ -89,11 +89,13 @@ class ApiService {
 
     return jsonDecode(response.body);
   }
+
   // جلب متوسط أسعار السوق
   static Future<List<dynamic>> getMarketPrices() async {
     final response = await http.get(Uri.parse('$cropsUrl/market-prices'));
     return jsonDecode(response.body);
   }
+
   // جلب بيانات المستخدم
   static Future<Map<String, dynamic>> getUser(String userId) async {
     final response = await http.get(Uri.parse('$baseUrl/user/$userId'));
@@ -113,6 +115,7 @@ class ApiService {
     );
     return jsonDecode(response.body);
   }
+
   // تعديل محصول
   static Future<Map<String, dynamic>> updateCrop({
     required String cropId,
@@ -127,8 +130,12 @@ class ApiService {
       Uri.parse('$cropsUrl/$cropId'),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: jsonEncode({
-        'title': title, 'category': category, 'price': price,
-        'quantity': quantity, 'unit': unit, 'location': location,
+        'title': title,
+        'category': category,
+        'price': price,
+        'quantity': quantity,
+        'unit': unit,
+        'location': location,
       }),
     );
     return jsonDecode(response.body);
@@ -143,6 +150,74 @@ class ApiService {
   // محاصيل مزارع معين
   static Future<List<dynamic>> getMyCrops(String farmerId) async {
     final response = await http.get(Uri.parse('$cropsUrl/farmer/$farmerId'));
+    return jsonDecode(response.body);
+  }
+
+  // إعادة تعيين كلمة المرور
+  static Future<Map<String, dynamic>> resetPassword({
+    required String phone,
+    required String newPassword,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/reset-password'),
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode({'phone': phone, 'newPassword': newPassword}),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // إرسال رمز تحقق (محاكاة)
+  static Future<Map<String, dynamic>> sendOtp(String phone) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/send-otp'),
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode({'phone': phone}),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // التحقق من الرمز وتغيير كلمة المرور
+  static Future<Map<String, dynamic>> verifyOtp({
+    required String phone,
+    required String otp,
+    required String newPassword,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/verify-otp'),
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode({
+        'phone': phone,
+        'otp': otp,
+        'newPassword': newPassword,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
+  // إضافة تقييم
+  static Future<Map<String, dynamic>> addRating({
+    required String buyerId,
+    required String farmerId,
+    required int score,
+    String comment = '',
+  }) async {
+    final response = await http.post(
+      Uri.parse('http://192.168.43.220:5000/api/ratings'),
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode({
+        'buyerId': buyerId,
+        'farmerId': farmerId,
+        'score': score,
+        'comment': comment,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // جلب تقييمات مزارع معين
+  static Future<Map<String, dynamic>> getFarmerRatings(String farmerId) async {
+    final response = await http.get(
+      Uri.parse('http://192.168.43.220:5000/api/ratings/farmer/$farmerId'),
+    );
     return jsonDecode(response.body);
   }
 }
