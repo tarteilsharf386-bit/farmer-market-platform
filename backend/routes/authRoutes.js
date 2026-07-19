@@ -65,5 +65,28 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'حدث خطأ', error: error.message });
   }
 });
+// جلب بيانات مستخدم واحد
+router.get('/user/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'حدث خطأ', error: error.message });
+  }
+});
 
+// تحديث بيانات المستخدم
+router.put('/user/:id', async (req, res) => {
+  try {
+    const { name, location } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { name, location },
+      { new: true }
+    ).select('-password');
+    res.status(200).json({ message: 'تم تحديث البيانات بنجاح', user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'حدث خطأ', error: error.message });
+  }
+});
 module.exports = router;

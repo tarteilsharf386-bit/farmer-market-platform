@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'crops_list_screen.dart';
+import '../services/session_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,6 +32,12 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => isLoading = false);
 
       if (result['token'] != null) {
+        await SessionManager.saveSession(
+          userId: result['user']['id'],
+          userName: result['user']['name'],
+          userRole: result['user']['role'],
+          token: result['token'],
+        );
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -38,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
               builder: (context) => CropsListScreen(
                 farmerId: result['user']['id'],
                 userName: result['user']['name'],
+                userRole: result['user']['role'],
               ),
             ),
           );
@@ -72,14 +80,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: AppColors.primary.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.storefront, size: 60, color: AppColors.primary),
+                  child: const Icon(
+                    Icons.storefront,
+                    size: 60,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 'تسجيل الدخول',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -117,7 +133,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ],
